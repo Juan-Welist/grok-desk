@@ -1145,14 +1145,14 @@ body.is-searching .search-results { display: block; }
   padding: 3px;
   height: var(--hit);
 }
-.seg button {
+.seg button, .seg a {
   flex: 1;
   border-radius: 9px;
   font-weight: 650;
   font-size: 15px;
   color: var(--secondary);
 }
-.seg button.is-on { background: var(--card-2); color: var(--text); }
+.seg button.is-on, .seg a.is-on { background: var(--card-2); color: var(--text); }
 .field {
   height: 48px;
   border-radius: 12px;
@@ -1271,3 +1271,8 @@ body.is-full .tabbar { display: none; }
 
 body[data-tab="audit"] .topbar,
 body[data-tab="coin"] .topbar { display: none; }
+
+.seg a { text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
+a.switch { text-decoration: none; }
+a.set-row { display: block; text-decoration: none; color: inherit; }
+a.btn { text-decoration: none; }

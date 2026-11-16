@@ -402,9 +402,29 @@
     const btn = e.target.closest("button[data-pct]");
     if (!btn) return;
     document.querySelectorAll("#sellSizes button").forEach((b) => b.classList.toggle("is-on", b === btn));
+    sellTarget.pct = Number(btn.getAttribute("data-pct")) || 100;
+    updateConfirmSell();
   });
 
-  function openSell() {
+
+  let sellTarget = { symbol: "", pct: 100 };
+  function sellCommand() {
+    const sym = sellTarget.symbol || "X";
+    return "sell " + sym + " " + (sellTarget.pct || 100);
+  }
+  function updateConfirmSell() {
+    const a = document.getElementById("confirmSell");
+    if (!a) return;
+    const href = (window.Screens && Screens.tgHref) ? Screens.tgHref(sellCommand()) : ("https://t.me/GrokWrenBot?text=" + encodeURIComponent(sellCommand()));
+    a.setAttribute("href", href);
+    a.classList.remove("is-disabled");
+  }
+
+  function openSell(info) {
+    if (info && info.symbol) sellTarget.symbol = info.symbol;
+    const on = document.querySelector("#sellSizes button.is-on");
+    if (on && on.getAttribute("data-pct")) sellTarget.pct = Number(on.getAttribute("data-pct")) || 100;
+    updateConfirmSell();
     const sheet = document.getElementById("sellSheet");
     sheet.hidden = false;
     sheet.classList.add("is-on");

@@ -1,4 +1,12 @@
 (function (global) {
+  const TG_BOT = "GrokWrenBot";
+  function tgHref(command) {
+    return "https://t.me/" + TG_BOT + "?text=" + encodeURIComponent(command || "");
+  }
+  function viaHint() {
+    return `<p class="hint">via Telegram</p>`;
+  }
+
   function esc(s) {
     return String(s ?? "").replace(/[&<>"']/g, (c) => ({
       "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
@@ -157,9 +165,14 @@
 
   function fullCard(bot) {
     const color = bot.color || "#fff";
+    const botLabel = bot.name || (bot.key || "").replace(/^./, (c) => c.toUpperCase());
+    const pauseCmd = bot.paused ? ("resume " + botLabel) : ("pause " + botLabel);
     const hint = bot.pause_locked
       ? "Locked while a position is open"
-      : "Needs Telegram (Step 11)";
+      : "via Telegram";
+    const switchCtl = bot.pause_locked
+      ? `<div class="switch ${bot.paused ? "" : "is-on"}" aria-disabled="true" title="${esc(hint)}"><i></i></div>`
+      : `<a class="switch ${bot.paused ? "" : "is-on"}" href="${esc(tgHref(pauseCmd))}" target="_blank" rel="noopener noreferrer" title="via Telegram"><i></i></a>`;
     const decisions = (bot.decisions || []).map((row) => activityRow(row, { fomo: true })).join("");
     return `<article class="bot-full" id="bot-full-${esc(bot.key || "")}" data-bot="${esc(bot.key || "")}">
       <div class="top">
@@ -168,7 +181,7 @@
         <span class="count">${esc(bot.headline || "")}</span>
       </div>
       <div class="switch-row">
-        <div class="switch ${bot.paused ? "" : "is-on"}" aria-disabled="true" title="${esc(hint)}"><i></i></div>
+        ${switchCtl}
         <span class="switch-hint">${esc(hint)}</span>
         <button class="settings-shortcut" type="button" data-settings="${esc(bot.name || "")}">Settings</button>
       </div>
@@ -297,9 +310,9 @@
       ${posLine}
       <div class="coin-actions">
         ${url ? `<a class="btn is-blue" href="${esc(url)}" target="_blank" rel="noopener noreferrer">Open on FOMO</a>` : `<span class="btn is-disabled">Open on FOMO</span>`}
-        <button class="btn is-disabled" type="button" id="sellNowBtn" ${pos ? "" : "disabled"}>Sell now</button>
+        <button class="btn ${pos ? "" : "is-disabled"}" type="button" id="sellNowBtn" ${pos ? "" : "disabled"} data-symbol="${esc((data && data.symbol) || "")}">Sell now</button>
       </div>
-      <p class="hint">Needs Telegram (Step 11)</p>`;
+      ${viaHint()}`;
     const canvas = body.querySelector("#candleChart");
     if (canvas && global.DeskCandles) {
       const chart = new global.DeskCandles(canvas);
@@ -307,7 +320,7 @@
       requestAnimationFrame(() => chart.resize());
     }
     const sell = body.querySelector("#sellNowBtn");
-    if (sell && onSell) sell.addEventListener("click", onSell);
+    if (sell && onSell) sell.addEventListener("click", () => onSell({ symbol: (data && data.symbol) || sell.getAttribute("data-symbol") || "" }));
   }
 
   function formatSettingValue(item) {
@@ -354,10 +367,11 @@
           ? `<input type="range" min="${esc(min)}" max="${esc(max)}" value="${esc(val)}" disabled>
              <div class="set-range">${esc(min)} – ${esc(max)}</div>`
           : "";
-        return `<div class="set-row">
+        const setCmd = item.key ? ("set " + item.key + " to ") : "set ";
+        return `<a class="set-row" href="${esc(tgHref(setCmd))}" target="_blank" rel="noopener noreferrer">
           <div class="lab"><span>${esc(item.label)}</span><b>${esc(formatSettingValue(item))}</b></div>
           ${slider}
-        </div>`;
+        </a>`;
       }).join("");
       return `<div class="set-group" id="settings-${esc(g.bot)}">
         <h3 style="color:${esc(g.color)}">${esc(g.bot)}</h3>
@@ -368,15 +382,17 @@
     el.innerHTML = `
       <div class="acct-block">
         <div class="acct-label">Mode</div>
-        <div class="seg" aria-disabled="true">
-          <button type="button" class="${modePaper ? "is-on" : ""}" disabled>PAPER</button>
-          <button type="button" class="${!modePaper ? "is-on" : ""}" disabled>LIVE</button>
+        <div class="seg">
+          <a class="${modePaper ? "is-on" : ""}" href="${esc(tgHref("paper"))}" target="_blank" rel="noopener noreferrer">PAPER</a>
+          <a class="${!modePaper ? "is-on" : ""}" href="${esc(tgHref("live"))}" target="_blank" rel="noopener noreferrer">LIVE</a>
         </div>
-        <p class="hint">Needs Telegram (Step 11)</p>
+        ${viaHint()}
       </div>
       <div class="acct-block">
         <div class="acct-label">Cash</div>
         <input class="field" value="${esc(Number.isFinite(Number(cash)) ? formatUsd(cash) : "")}" disabled>
+        <a class="row-link" href="${esc(tgHref("withdraw $"))}" target="_blank" rel="noopener noreferrer">Withdraw <span class="chev">›</span></a>
+        ${viaHint()}
       </div>
       <div class="acct-block">
         ${profile ? `<a class="row-link" href="${esc(profile)}" target="_blank" rel="noopener noreferrer">Your FOMO profile <span class="chev">›</span></a>` : `<div class="acct-row">Your FOMO profile <span class="chev">›</span></div>`}
@@ -384,25 +400,25 @@
       </div>
       <div class="acct-block">
         <div class="acct-label">Copy picks</div>
-        <div class="acct-row">Off <span class="chev">›</span></div>
-        <p class="hint">Needs Telegram (Step 11)</p>
+        <a class="acct-row" href="${esc(tgHref("picks"))}" target="_blank" rel="noopener noreferrer">Off <span class="chev">›</span></a>
+        ${viaHint()}
       </div>
       <div class="acct-block">
         <div class="acct-label">Pushes</div>
         <div class="acct-row">${esc((account && account.pushes && account.pushes.label) || "Telegram only (plan B)")}</div>
-        <button class="row-link" type="button" disabled>Send test push <span class="chev">›</span></button>
+        <a class="row-link" href="${esc(tgHref("status"))}" target="_blank" rel="noopener noreferrer">Send test push <span class="chev">›</span></a>
         <button class="row-link" type="button" id="watchBtn">Watch in Grok Bot <span class="chev">›</span></button>
       </div>
       <div class="acct-block">
         <div class="acct-label">Settings</div>
         ${groupsHtml || `<div class="empty-copy" style="padding:16px 0">No settings yet</div>`}
-        <p class="hint">Read-only until Telegram (Step 11)</p>
+        ${viaHint()}
       </div>`;
     return { signup };
   }
 
   global.Screens = {
-    esc, safeUrl, formatUsd, formatPrice, formatCompact, formatInt,
+    esc, safeUrl, tgHref, formatUsd, formatPrice, formatCompact, formatInt,
     activityRow, checksHtml, miniCard, fullCard,
     renderBots, renderCarousel, renderActivity, renderAudit, renderCoin, renderAccount,
   };

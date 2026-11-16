@@ -1,5 +1,5 @@
 /* Minimal shell worker. Never cache desk data (R2, /d/, state, chart, screen). */
-const CACHE = "grok-desk-shell-v2";
+const CACHE = "grok-desk-shell-v3";
 const SHELL = [
   "./",
   "./index.html",
