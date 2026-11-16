@@ -1,16 +1,165 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>FOMO desk</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body { font-family: system-ui, sans-serif; background: #0b0d10; color: #e8eaed; margin: 2rem; }
-    .ok { color: #7dffb3; }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Grok Bot">
+  <title>Grok Bot</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="icon" href="apple-touch-icon.png" type="image/png">
+  <link rel="stylesheet" href="css/app.css">
 </head>
-<body>
-  <h1>FOMO desk</h1>
-  <p class="ok">Control plane stub. Mode stays PAPER until test 9 passes.</p>
+<body class="is-loading" data-tab="home">
+  <div id="app">
+    <header class="topbar">
+      <button class="avatar" id="avatarBtn" type="button" aria-label="Account">
+        <span class="avatar-disc" id="avatarInitial">G</span>
+      </button>
+      <div class="brand" id="brand">Grok Bot <span class="brand-chevron">›</span></div>
+      <input class="search-field" id="searchField" type="search" placeholder="Search" autocomplete="off" enterkeyhint="search">
+      <div class="top-actions">
+        <button class="icon-btn" id="searchBtn" type="button" aria-label="Search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"></circle>
+            <path d="M20 20l-3.5-3.5"></path>
+          </svg>
+        </button>
+        <button class="icon-btn" id="bellBtn" type="button" aria-label="Activity">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M6 9a6 6 0 1 1 12 0c0 4 1.5 6 2 7H4c.5-1 2-3 2-7z"></path>
+            <path d="M10 19a2 2 0 0 0 4 0"></path>
+          </svg>
+          <span class="bell-dot" id="bellDot"></span>
+        </button>
+      </div>
+      <button class="search-cancel" id="searchCancel" type="button">Cancel</button>
+    </header>
+
+    <div class="status-row" id="statusRow" role="status"></div>
+
+    <section class="view is-on" id="view-home" data-view="home">
+      <div class="home-loading">
+        <div class="hero">
+          <div class="skel skel-balance"></div>
+          <div class="skel skel-meta"></div>
+        </div>
+        <div class="skel skel-chart"></div>
+        <div class="skel skel-ranges"></div>
+        <div class="skel skel-live"></div>
+      </div>
+
+      <div class="home-empty-msg" id="emptyMsg">Waiting for the first trade</div>
+
+      <div class="home-loaded">
+        <div class="hero">
+          <div class="balance-row">
+            <div class="odometer" id="balance" aria-live="polite"></div>
+            <span class="paper-badge" id="paperBadge" hidden>PAPER</span>
+          </div>
+          <div class="meta-row">
+            <div class="today-pct" id="todayPct"></div>
+            <div class="mult-pill" id="multPill" hidden></div>
+          </div>
+        </div>
+
+        <div class="chart-wrap" id="chartWrap">
+          <canvas id="chart" width="390" height="228"></canvas>
+          <div class="chart-marks" id="chartMarks"></div>
+          <div class="chart-empty" id="chartEmpty">Waiting for the first trade</div>
+          <div class="chart-error" id="chartError">Chart unavailable</div>
+        </div>
+
+        <div class="ranges" id="ranges" role="tablist" aria-label="Chart range">
+          <button type="button" data-range="LIVE" class="is-on">LIVE</button>
+          <button type="button" data-range="1H">1H</button>
+          <button type="button" data-range="4H">4H</button>
+          <button type="button" data-range="1D">1D</button>
+          <button type="button" data-range="1W">1W</button>
+          <button type="button" data-range="ALL">ALL</button>
+        </div>
+
+        <section class="live">
+          <h2 class="live-label">Live screen</h2>
+          <div class="live-frame is-empty" id="liveFrame">
+            <img id="liveImg" alt="Live desk screen">
+            <div class="live-paused">Paused · private</div>
+            <div class="live-empty">Waiting for a frame</div>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section class="view" id="view-bots" data-view="bots">
+      <div class="place-head">Bots</div>
+      <div class="place-stack">
+        <div class="skel"></div>
+        <div class="skel"></div>
+        <div class="skel"></div>
+        <div class="skel"></div>
+        <div class="skel"></div>
+      </div>
+    </section>
+
+    <section class="view" id="view-activity" data-view="activity">
+      <div class="place-head">Activity</div>
+      <div class="place-stack">
+        <div class="skel"></div>
+        <div class="skel"></div>
+        <div class="skel lg"></div>
+        <div class="skel"></div>
+        <div class="skel"></div>
+      </div>
+    </section>
+
+    <section class="view" id="view-account" data-view="account">
+      <div class="place-head">Account</div>
+      <div class="place-stack">
+        <div class="skel lg"></div>
+        <div class="skel"></div>
+        <div class="skel"></div>
+      </div>
+    </section>
+  </div>
+
+  <nav class="tabbar" aria-label="Tabs">
+    <button class="tab is-on" type="button" data-tab="home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 11.5 12 4l8 7.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-8.5z"></path>
+      </svg>
+      <span>Home</span>
+    </button>
+    <button class="tab" type="button" data-tab="bots">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="5" y="8" width="14" height="11" rx="3"></rect>
+        <path d="M9 8V6.5A3 3 0 0 1 15 6.5V8"></path>
+        <circle cx="9.5" cy="13.5" r="1" fill="currentColor" stroke="none"></circle>
+        <circle cx="14.5" cy="13.5" r="1" fill="currentColor" stroke="none"></circle>
+      </svg>
+      <span>Bots</span>
+    </button>
+    <button class="tab" type="button" data-tab="activity">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M5 6h14M5 12h14M5 18h10"></path>
+      </svg>
+      <span>Activity</span>
+    </button>
+    <button class="tab" type="button" data-tab="account">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="8.5" r="3.2"></circle>
+        <path d="M5.5 19c1.2-3 3.5-4.5 6.5-4.5s5.3 1.5 6.5 4.5"></path>
+      </svg>
+      <span>Account</span>
+    </button>
+  </nav>
+
+  <script src="js/data.js"></script>
+  <script src="js/odometer.js"></script>
+  <script src="js/chart.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>
