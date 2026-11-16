@@ -68,8 +68,9 @@
       : "";
     return `<button type="button" class="act-row" data-dest="${esc(dest)}" data-mint="${esc(mint)}">
       <div class="act-title">${esc(row.title || "")}</div>
-      <div class="act-sub">${esc(row.subtitle || "")}${fomoLink ? " · " + fomoLink : ""}</div>
+      <div class="act-sub">${esc(row.subtitle || "")}</div>
       <div class="act-val ${actTone(row)}">${esc(row.value || "")}</div>
+      ${fomoLink}
     </button>`;
   }
 
