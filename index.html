@@ -40,6 +40,7 @@
       <button class="search-cancel" id="searchCancel" type="button">Cancel</button>
     </header>
 
+    <div class="search-results" id="searchResults"></div>
     <div class="status-row" id="statusRow" role="status"></div>
 
     <section class="view is-on" id="view-home" data-view="home">
@@ -86,43 +87,107 @@
         <section class="live">
           <h2 class="live-label">Live screen</h2>
           <div class="live-frame is-empty" id="liveFrame">
-            <img id="liveImg" alt="Live desk screen">
+            <div class="live-bufs">
+              <img id="liveImgA" alt="Live desk screen">
+              <img id="liveImgB" alt="">
+            </div>
+            <div class="live-top">
+              <div class="live-age"><span class="live-dot" id="liveDot"></span><span id="liveAgeText">Last frame</span></div>
+              <div class="live-lane" id="liveLane">Idle</div>
+            </div>
             <div class="live-paused">Paused · private</div>
             <div class="live-empty">Waiting for a frame</div>
           </div>
+          <div class="live-order" id="liveOrder">
+            <span id="liveOrderLabel"></span>
+            <span class="checks" id="liveChecks"></span>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-head">
+            <h2>Bots · <span class="muted" id="botsRunningLabel">0 running</span></h2>
+          </div>
+          <div class="carousel" id="botCarousel"></div>
+        </section>
+
+        <section class="section">
+          <div class="section-head">
+            <h2>Activity</h2>
+            <button class="link" type="button" id="activitySeeAll">See all</button>
+          </div>
+          <div class="act-list" id="activityPreview"></div>
         </section>
       </div>
     </section>
 
     <section class="view" id="view-bots" data-view="bots">
       <div class="place-head">Bots</div>
-      <div class="place-stack">
-        <div class="skel"></div>
-        <div class="skel"></div>
-        <div class="skel"></div>
-        <div class="skel"></div>
-        <div class="skel"></div>
+      <div class="home-loading bots-loading">
+        <div class="place-stack">
+          <div class="skel lg"></div>
+          <div class="skel lg"></div>
+          <div class="skel lg"></div>
+        </div>
       </div>
+      <div class="bots-stack" id="botsStack"></div>
     </section>
 
     <section class="view" id="view-activity" data-view="activity">
       <div class="place-head">Activity</div>
-      <div class="place-stack">
-        <div class="skel"></div>
-        <div class="skel"></div>
-        <div class="skel lg"></div>
-        <div class="skel"></div>
-        <div class="skel"></div>
+      <div class="home-loading activity-loading">
+        <div class="place-stack">
+          <div class="skel"></div>
+          <div class="skel"></div>
+          <div class="skel"></div>
+        </div>
       </div>
+      <div class="act-list" id="activityList"></div>
+      <div class="empty-copy" id="activityEmpty" hidden>Nothing yet tonight</div>
     </section>
 
     <section class="view" id="view-account" data-view="account">
       <div class="place-head">Account</div>
-      <div class="place-stack">
-        <div class="skel lg"></div>
-        <div class="skel"></div>
-        <div class="skel"></div>
+      <div class="home-loading account-loading">
+        <div class="place-stack">
+          <div class="skel lg"></div>
+          <div class="skel"></div>
+          <div class="skel"></div>
+        </div>
       </div>
+      <div class="acct" id="accountBody"></div>
+    </section>
+
+    <section class="view" id="view-audit" data-view="audit">
+      <header class="subhead">
+        <button class="back-btn" type="button" data-back aria-label="Back">‹</button>
+        <h1 id="auditTitle">Audit</h1>
+        <a class="fomo-link" id="auditFomo" href="#" target="_blank" rel="noopener noreferrer">Open on FOMO</a>
+      </header>
+      <div class="home-loading audit-loading">
+        <div class="place-stack">
+          <div class="skel"></div>
+          <div class="skel lg"></div>
+        </div>
+      </div>
+      <div class="audit-wrap" id="auditBody"></div>
+      <div class="empty-copy" id="auditEmpty" hidden>No audit yet</div>
+    </section>
+
+    <section class="view" id="view-coin" data-view="coin">
+      <header class="subhead">
+        <button class="back-btn" type="button" data-back aria-label="Back">‹</button>
+        <h1 id="coinHead">Coin</h1>
+        <span class="paper-badge" id="coinPaper" hidden>PAPER</span>
+      </header>
+      <div class="home-loading coin-loading">
+        <div class="place-stack">
+          <div class="skel"></div>
+          <div class="skel lg"></div>
+        </div>
+      </div>
+      <div class="coin-wrap" id="coinBody"></div>
+      <div class="empty-copy" id="coinEmpty" hidden>No coin data</div>
     </section>
   </div>
 
@@ -157,9 +222,33 @@
     </button>
   </nav>
 
+  <div class="sheet-mask" id="sellSheet" hidden>
+    <div class="sheet">
+      <h3>Sell now</h3>
+      <div class="sizes" id="sellSizes">
+        <button type="button" data-pct="25">25%</button>
+        <button type="button" data-pct="50">50%</button>
+        <button type="button" data-pct="100" class="is-on">100%</button>
+      </div>
+      <button class="btn is-disabled" type="button" id="confirmSell" disabled>Confirm sell</button>
+      <p class="hint">Needs Telegram (Step 11)</p>
+    </div>
+  </div>
+
+  <div class="live-full" id="liveFull">
+    <div class="stage"><img id="liveFullImg" alt="Live desk screen"></div>
+    <div class="bar">
+      <button class="btn-sm close" type="button" id="liveFullClose">Close</button>
+      <a class="btn-sm" id="liveFullFomo" href="#" target="_blank" rel="noopener noreferrer" hidden>Open on FOMO</a>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status"></div>
+
   <script src="js/data.js"></script>
   <script src="js/odometer.js"></script>
   <script src="js/chart.js"></script>
+  <script src="js/screens.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

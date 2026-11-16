@@ -276,4 +276,99 @@
   }
 
   global.DeskChart = DeskChart;
+
+  class DeskCandles {
+    constructor(canvas) {
+      this.canvas = canvas;
+      this.ctx = canvas.getContext("2d");
+      this.candles = [];
+      this.exit = null;
+      this.resize();
+    }
+
+    resize() {
+      if (!this.canvas) return;
+      const dpr = Math.max(1, window.devicePixelRatio || 1);
+      const rect = this.canvas.getBoundingClientRect();
+      const w = Math.max(1, Math.round(rect.width * dpr));
+      const h = Math.max(1, Math.round(rect.height * dpr));
+      if (this.canvas.width !== w || this.canvas.height !== h) {
+        this.canvas.width = w;
+        this.canvas.height = h;
+      }
+      this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      this.cssW = rect.width;
+      this.cssH = rect.height;
+      this.draw();
+    }
+
+    setData({ candles, exit }) {
+      this.candles = (candles || []).map((c) => ({
+        t: Date.parse(c.ts),
+        o: Number(c.open ?? c.price ?? c.close),
+        h: Number(c.high ?? c.price ?? c.close),
+        l: Number(c.low ?? c.price ?? c.close),
+        c: Number(c.close ?? c.price),
+      })).filter((c) => Number.isFinite(c.t) && Number.isFinite(c.c));
+      this.exit = exit == null || exit === "" ? null : Number(exit);
+      this.resize();
+    }
+
+    draw() {
+      const ctx = this.ctx;
+      const w = this.cssW || 0;
+      const h = this.cssH || 0;
+      if (!w || !h) return;
+      ctx.clearRect(0, 0, w, h);
+      const padL = 16, padR = 16, padT = 12, padB = 16;
+      const rows = this.candles;
+      if (!rows.length) return;
+      let minV = Math.min(...rows.map((r) => Math.min(r.l, r.c)));
+      let maxV = Math.max(...rows.map((r) => Math.max(r.h, r.c)));
+      if (Number.isFinite(this.exit)) {
+        minV = Math.min(minV, this.exit);
+        maxV = Math.max(maxV, this.exit);
+      }
+      if (minV === maxV) {
+        const pad = Math.max(Math.abs(minV) * 0.02, minV * 0.0001 || 0.0000001);
+        minV -= pad;
+        maxV += pad;
+      }
+      const yOf = (v) => padT + (1 - (v - minV) / (maxV - minV)) * (h - padT - padB);
+      const n = rows.length;
+      const slot = (w - padL - padR) / Math.max(n, 1);
+      const cw = Math.max(2, Math.min(8, slot * 0.6));
+
+      if (Number.isFinite(this.exit)) {
+        const y = yOf(this.exit);
+        ctx.save();
+        ctx.beginPath();
+        ctx.setLineDash([4, 5]);
+        ctx.strokeStyle = "#ff9f0a";
+        ctx.lineWidth = 1;
+        ctx.moveTo(padL, y);
+        ctx.lineTo(w - padR, y);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      rows.forEach((r, i) => {
+        const x = padL + slot * i + slot / 2;
+        const up = r.c >= r.o;
+        ctx.strokeStyle = up ? "#00d35a" : "#ff453a";
+        ctx.fillStyle = ctx.strokeStyle;
+        ctx.beginPath();
+        ctx.moveTo(x, yOf(r.h));
+        ctx.lineTo(x, yOf(r.l));
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        const top = yOf(Math.max(r.o, r.c));
+        const bot = yOf(Math.min(r.o, r.c));
+        const bh = Math.max(1, bot - top);
+        ctx.fillRect(x - cw / 2, top, cw, bh);
+      });
+    }
+  }
+
+  global.DeskCandles = DeskCandles;
 })(window);

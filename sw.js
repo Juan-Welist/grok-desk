@@ -1,5 +1,5 @@
 /* Minimal shell worker. Never cache desk data (R2, /d/, state, chart, screen). */
-const CACHE = "grok-desk-shell-v1";
+const CACHE = "grok-desk-shell-v2";
 const SHELL = [
   "./",
   "./index.html",
@@ -7,6 +7,7 @@ const SHELL = [
   "./js/data.js",
   "./js/odometer.js",
   "./js/chart.js",
+  "./js/screens.js",
   "./js/app.js",
   "./manifest.json",
   "./apple-touch-icon.png",
@@ -19,7 +20,7 @@ function isDataRequest(url) {
   if (u.hostname.endsWith("r2.dev") || u.hostname.includes("r2.cloudflarestorage.com")) return true;
   if (u.pathname.includes("/d/")) return true;
   const base = u.pathname.split("/").pop() || "";
-  if (/^(state|chart|activity|orders|account|bots)\.json$/.test(base)) return true;
+  if (/^(state|chart|activity|orders|account|bots|settings|coins)\.json$/.test(base)) return true;
   if (base === "screen.jpg") return true;
   return false;
 }
