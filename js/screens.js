@@ -15,6 +15,7 @@
   }
 
   function formatUsd(n, digits) {
+    if (n == null || n === "") return "—";
     const v = Number(n);
     if (!Number.isFinite(v)) return "—";
     const d = digits == null ? 2 : digits;
@@ -23,6 +24,7 @@
   }
 
   function formatPrice(n) {
+    if (n == null || n === "") return "—";
     const v = Number(n);
     if (!Number.isFinite(v)) return "—";
     if (Math.abs(v) >= 1) return formatUsd(v, v >= 100 ? 2 : 4);
@@ -31,6 +33,7 @@
   }
 
   function formatCompact(n) {
+    if (n == null || n === "") return "—";
     const v = Number(n);
     if (!Number.isFinite(v)) return "—";
     const sign = v < 0 ? "-" : "";
@@ -43,6 +46,7 @@
   }
 
   function formatInt(n) {
+    if (n == null || n === "") return "—";
     const v = Number(n);
     if (!Number.isFinite(v)) return "—";
     return Math.round(v).toLocaleString("en-US");

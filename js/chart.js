@@ -336,8 +336,10 @@
       }
       const yOf = (v) => padT + (1 - (v - minV) / (maxV - minV)) * (h - padT - padB);
       const n = rows.length;
-      const slot = (w - padL - padR) / Math.max(n, 1);
-      const cw = Math.max(2, Math.min(8, slot * 0.6));
+      const span = w - padL - padR;
+      const slot = n <= 3 ? Math.min(28, span / 6) : span / Math.max(n, 1);
+      const cw = Math.max(3, Math.min(10, slot * 0.6));
+      const origin = n <= 3 ? (w / 2) - (slot * n) / 2 : padL;
 
       if (Number.isFinite(this.exit)) {
         const y = yOf(this.exit);
@@ -353,7 +355,7 @@
       }
 
       rows.forEach((r, i) => {
-        const x = padL + slot * i + slot / 2;
+        const x = origin + slot * i + slot / 2;
         const up = r.c >= r.o;
         ctx.strokeStyle = up ? "#00d35a" : "#ff453a";
         ctx.fillStyle = ctx.strokeStyle;
