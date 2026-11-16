@@ -169,28 +169,15 @@
         maxV = Math.max(maxV, this.start);
       }
       if (minV === maxV) {
-        minV -= 1;
-        maxV += 1;
+        const pad = Math.max(0.25, Math.abs(minV) * 0.02);
+        minV -= pad;
+        maxV += pad;
       }
       const minT = pts[0].t;
       const maxT = pts[pts.length - 1].t === pts[0].t ? pts[0].t + 1 : pts[pts.length - 1].t;
 
       const xOf = (t) => plot.left + ((t - minT) / (maxT - minT)) * (plot.right - plot.left);
       const yOf = (v) => plot.bottom - ((v - minV) / (maxV - minV)) * (plot.bottom - plot.top);
-
-      // Dashed start line
-      if (Number.isFinite(this.start)) {
-        const y = yOf(this.start);
-        ctx.save();
-        ctx.beginPath();
-        ctx.setLineDash([4, 5]);
-        ctx.strokeStyle = "rgba(235, 235, 245, 0.3)";
-        ctx.lineWidth = 1;
-        ctx.moveTo(plot.left, y);
-        ctx.lineTo(plot.right, y);
-        ctx.stroke();
-        ctx.restore();
-      }
 
       ctx.beginPath();
       pts.forEach((p, i) => {
@@ -232,6 +219,20 @@
       ctx.arc(xOf(last.t), yOf(last.v), 3.2, 0, Math.PI * 2);
       ctx.fillStyle = GREEN;
       ctx.fill();
+
+      // Dashed start line last so it stays visible on a flat tape.
+      if (Number.isFinite(this.start)) {
+        const y = yOf(this.start);
+        ctx.save();
+        ctx.beginPath();
+        ctx.setLineDash([3.5, 5]);
+        ctx.strokeStyle = "rgba(235, 235, 245, 0.55)";
+        ctx.lineWidth = 1;
+        ctx.moveTo(8, y);
+        ctx.lineTo(w - 8, y);
+        ctx.stroke();
+        ctx.restore();
+      }
 
       // Marks sit on the line at their timestamp; value used for y if present
       const valueAt = (t) => {
